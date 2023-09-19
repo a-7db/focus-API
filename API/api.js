@@ -1,13 +1,17 @@
 const api_key = 'iZn3VEXKyqrcRGzS5hOyGcMAVOQl8RuDRSBwvkdSR4MllMkj197Unea1'
-const collection = 'https://api.pexels.com/v1/collections/8xntbhr'
+const auth = function (request) { request.setRequestHeader('Authorization', api_key)}
+const collection = 'https://api.pexels.com/v1/collections/'
 const photo = 'https://api.pexels.com/v1/photos/'
+const all_collections = 'https://api.pexels.com/v1/collections/featured'
 
 
-function get_home_api(){
+function show_collection(){
+    const id = getIdURL('collection-no')
+
     let request = new XMLHttpRequest()
-    request.open('GET', collection)
+    request.open('GET', collection + (id ? id : '8xntbhr'))
     request.responseType = 'json'
-    request.setRequestHeader('Authorization', api_key)
+    auth(request)
     request.send()
 
 
@@ -42,12 +46,12 @@ function user_selected(id){
 }
 
 function photo_details() {
-    const id = getIdURL()
+    const id = getIdURL('photoId')
 
     let request = new XMLHttpRequest()
     request.open('GET', `${photo + id}`)
     request.responseType = 'json'
-    request.setRequestHeader('Authorization', api_key)
+    auth(request)
     request.send()
     document.getElementById('details').innerHTML = ''
 
@@ -64,8 +68,36 @@ function photo_details() {
     }
 }
 
-function getIdURL(){
+function getIdURL(param){
     const url = new URLSearchParams(window.location.search)
-    return url.get('photoId')
+    return url.get(param)
 
+}
+
+
+function menu(){
+    let request = new XMLHttpRequest()
+    request.open('GET', all_collections)
+    request.responseType = 'json'
+    auth(request)
+    request.send()
+
+    let el = document.getElementById('collections')
+    el.innerHTML = `<li><a href="index.html?collection-no=8xntbhr">Home</a></li>`
+    request.onload = function(){
+        let data = request.response
+        for(let elment of data.collections){
+            let href = `href="index.html?collection-no=${elment.id}"`
+            let content = `<li><a ${href} >${elment.title}</a></li>`
+            
+            el.innerHTML += content
+        }
+    }
+}
+
+menu()
+
+function collection_id(id){
+    window.location = `index.html?collection-no=${id}`
+    console.log(id);
 }
