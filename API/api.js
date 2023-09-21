@@ -3,6 +3,7 @@ const auth = function (request) { request.setRequestHeader('Authorization', api_
 const collection = 'https://api.pexels.com/v1/collections/'
 const photo = 'https://api.pexels.com/v1/photos/'
 const all_collections = 'https://api.pexels.com/v1/collections/featured'
+const get_search = 'https://api.pexels.com/v1/search?query='
 
 
 function show_collection(){
@@ -101,3 +102,46 @@ function collection_id(id){
     window.location = `index.html?collection-no=${id}`
     console.log(id);
 }
+
+
+function search(){
+    const search_box = document.getElementById('search_box')
+    search_box.addEventListener('keyup', function(){
+        if (search_box.value != '') {
+            let request = new XMLHttpRequest()
+            request.open('GET', get_search + search_box.value)
+            request.responseType = 'json'
+            auth(request)
+            request.send()
+            document.getElementById('autocomplete').innerHTML = ""
+            request.onload = () => {
+                if (request.status > 199 && request.status < 300) {
+                    let data = request.response
+
+                    
+                    if(data.total_results > 0){
+                        for (let obj of data.photos) {
+                            let content = `
+                        <a style="cursor: pointer;" onclick="user_selected(${obj.id})">
+                            <dev style="background-color: rgb(249, 249, 249); display: block; padding: 5px;">
+                                ${obj.alt}
+                            </dev>
+                        </a>
+                        `
+                        document.getElementById('autocomplete').innerHTML += content
+                    }
+                } 
+                else
+                {
+                        document.getElementById('autocomplete').innerHTML = 'Not Found!'
+
+                    }
+                }
+            }
+        }else{
+            document.getElementById('autocomplete').innerHTML = ""
+
+        }
+    })
+}
+search()
